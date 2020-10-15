@@ -16,15 +16,19 @@ object EncodeUtils {
         isHexUpperCase = isUpperCase
     }
 
-    fun ByteArray.toHexString() = joinToString(hexSeparator) { hexFormat.format(it) }
+    fun ByteArray.toHexText() = joinToString(hexSeparator) { hexFormat.format(it) }
+
+    fun String.toHexText() = toByteArray().toHexText()
 
     fun String.hexToByteArray() = (hexSeparator.takeIf { it.isNotEmpty() }?.let { s ->
         replace(s, "")
     } ?: this).chunked(2).map { it.toInt(16).toByte() }.toByteArray()
 
+    fun String.hexToText() = String(hexToByteArray())
+
     fun String.hexToBase64() = hexToByteArray().toBase64()
 
-    fun String.base64ToHex() = base64ToByteArray().toHexString()
+    fun String.base64ToHex() = base64ToByteArray().toHexText()
 
     fun ByteArray.toBase64() = Base64.getEncoder().encodeToString(this)
 

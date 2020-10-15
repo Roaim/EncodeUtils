@@ -1,7 +1,9 @@
 import EncodeUtils.base64ToHex
 import EncodeUtils.base64ToText
 import EncodeUtils.hexToBase64
+import EncodeUtils.hexToText
 import EncodeUtils.toBase64
+import EncodeUtils.toHexText
 
 const val APP_NAME = "ENCODE UTILS"
 const val HEADER_TEXT = "" +
@@ -15,6 +17,9 @@ const val CHOICE_TEXT =
             "3. Hex to Base64\n" +
             "4. Base64 to Hex\n" +
             "5. Base64 to Hex (Pretty)\n" +
+            "6. Hex to Text\n" +
+            "7. Text to Hex\n" +
+            "8. Text to Hex (Pretty)\n" +
             "Enter 0 to exit"
 const val FOOTER_TEXT = "Thank you for using $APP_NAME"
 
@@ -23,11 +28,14 @@ fun main(args: Array<String>) {
     loop@ while (true) {
         println(CHOICE_TEXT)
         when (readNumber()) {
-            1 -> convertTextToBase64()
-            2 -> convertBase64ToText()
-            3 -> convertHexToBase64()
-            4 -> convertBase64ToHex()
-            5 -> convertBase64ToHex(pretty = true)
+            1 -> convertOutput("Text", "Base64") { readText().toBase64() }
+            2 -> convertOutput("Base64", "Text") { readText().base64ToText() }
+            3 -> convertOutput("Hex", "Base64") { readHex().hexToBase64() }
+            4 -> convertOutputToHex("Base64") { readText().base64ToHex() }
+            5 -> convertOutputToHex("Base64", pretty = true) { readText().base64ToHex() }
+            6 -> convertOutput("Hex", "Text") { readHex().hexToText() }
+            7 -> convertOutputToHex("Text") { readText().toHexText() }
+            8 -> convertOutputToHex("Text", pretty = true) { readText().toHexText() }
             0 -> break@loop
             else -> continue@loop
         }
@@ -35,34 +43,24 @@ fun main(args: Array<String>) {
     println(FOOTER_TEXT)
 }
 
-fun convertBase64ToText() {
-    println("Please enter Base64 to be converted to Text:")
-    println("Text:\n${readText().base64ToText()}")
-}
-
-fun convertTextToBase64() {
-    println("Please enter Text to be converted to Base64:")
-    println("Base64:\n${readText().toBase64()}")
-}
-
-fun convertBase64ToHex(pretty: Boolean = false) {
-    println("Please enter Base64 to be converted to Hex:")
-    val base64 = readText().trim()
+inline fun convertOutputToHex(from: String, pretty: Boolean = false, convert: () -> String) {
     if (pretty) EncodeUtils.setHexPrettyFormatting() else EncodeUtils.setHexDefaultFormatting()
-    println("Hex:\n${base64.base64ToHex()}")
+    convertOutput(from, "Hex", convert)
 }
 
-fun convertHexToBase64() {
-    println("Please enter Hex to be converted to Base64")
-    var hex = readText()
-    if (hex.contains(':')) {
+inline fun convertOutput(from: String, to: String, convert: () -> String) {
+    println("Please enter $from to be converted to $to")
+    println("$to:\n${convert()}\n")
+}
+
+fun readHex() = readText().run {
+    if (contains(':')) {
         EncodeUtils.setHexPrettyFormatting()
-        hex = hex.toUpperCase().trim()
+        toUpperCase().trim()
     } else {
         EncodeUtils.setHexDefaultFormatting()
-        hex = hex.toLowerCase().trim()
+        toLowerCase().trim()
     }
-    println("Base64:\n${hex.hexToBase64()}")
 }
 
 fun readNumber(): Int = try {
